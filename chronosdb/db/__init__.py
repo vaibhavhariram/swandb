@@ -8,6 +8,7 @@ from chronosdb.db.models import (
     FeatureVersion,
     IngestionJob,
     MaterializationJob,
+    QualityResult,
     Source,
     Tenant,
 )
@@ -20,6 +21,7 @@ __all__ = [
     "FeatureVersion",
     "IngestionJob",
     "MaterializationJob",
+    "QualityResult",
     "Source",
     "Tenant",
     "get_async_session",

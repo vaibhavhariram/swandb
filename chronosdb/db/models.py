@@ -218,6 +218,32 @@ class MaterializationJob(Base):
     )
 
 
+class QualityResult(Base):
+    """Parity validation and quality check results."""
+
+    __tablename__ = "quality_results"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=_uuid4,
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    job_type: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False)
+    sample_size: Mapped[Optional[int]] = mapped_column(nullable=True)
+    mismatch_count: Mapped[Optional[int]] = mapped_column(nullable=True)
+    mismatch_rate: Mapped[Optional[float]] = mapped_column(nullable=True)
+    threshold: Mapped[Optional[float]] = mapped_column(nullable=True)
+    details: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class Checkpoint(Base):
     """Checkpoints for PIT correctness and offset tracking."""
 

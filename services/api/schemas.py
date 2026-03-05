@@ -148,3 +148,55 @@ class GetFeaturesResponse(BaseModel):
     """Response from online feature fetch."""
 
     features: list[FeatureValue]
+
+
+# --- Training build ---
+
+
+class TrainingBuildRequest(BaseModel):
+    """Request to build training dataset."""
+
+    labels_path: str = Field(..., description="Path to labels parquet (entity_id, label_ts, ...)")
+    feature_refs: list[FeatureRef] = Field(
+        ...,
+        min_length=1,
+        description="Features to join",
+    )
+    entity_key: str = Field(default="user_id", description="Entity key in entity_keys")
+
+
+class TrainingBuildResponse(BaseModel):
+    """Response from training build."""
+
+    build_id: str
+    output_path: str
+    manifest_path: str
+    row_count: int
+    feature_refs: list[dict[str, Any]]
+    spec_hashes: list[str]
+
+
+# --- Parity validation ---
+
+
+class ValidateParityRequest(BaseModel):
+    """Request for offline/online parity validation."""
+
+    feature_refs: list[FeatureRef] = Field(
+        ...,
+        min_length=1,
+        description="Features to validate",
+    )
+    sample_size: int = Field(default=100, ge=1, le=10000)
+    threshold: float = Field(default=0.0, ge=0.0, le=1.0, description="Max allowed mismatch_rate")
+
+
+class ValidateParityResponse(BaseModel):
+    """Response from parity validation."""
+
+    job_id: str
+    status: str
+    sample_size: int
+    mismatch_count: int
+    mismatch_rate: float
+    threshold: float

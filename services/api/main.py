@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from chronosdb.db.base import init_async_engine
-from services.api import features, ingest, materialize, registry
+from services.api import features, ingest, materialize, registry, training, validate
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.middleware import (
@@ -104,4 +104,6 @@ v1_router.include_router(registry.router)
 v1_router.include_router(ingest.router)
 v1_router.include_router(materialize.router)
 v1_router.include_router(features.router)
+v1_router.include_router(training.router)
+v1_router.include_router(validate.router)
 app.include_router(v1_router)

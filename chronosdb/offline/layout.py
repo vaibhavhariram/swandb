@@ -35,3 +35,27 @@ def features_path(
     base = Path(base_dir)
     dt_str = dt.strftime("%Y-%m-%d")
     return base / "features" / f"tenant={tenant_id}" / f"feature={feature_name}" / f"version={version}" / f"dt={dt_str}" / f"{part}.parquet"
+
+
+def training_path(
+    base_dir: str | Path,
+    tenant_id: str,
+    build_id: str,
+    part: str = "part-0000",
+) -> Path:
+    """
+    Return path for training dataset parquet.
+    Layout: offline/training/tenant={tenant}/build={build_id}/part-0000.parquet
+    """
+    base = Path(base_dir)
+    return base / "training" / f"tenant={tenant_id}" / f"build={build_id}" / f"{part}.parquet"
+
+
+def training_manifest_path(
+    base_dir: str | Path,
+    tenant_id: str,
+    build_id: str,
+) -> Path:
+    """Path for training manifest JSON."""
+    base = Path(base_dir)
+    return base / "training" / f"tenant={tenant_id}" / f"build={build_id}" / "manifest.json"
