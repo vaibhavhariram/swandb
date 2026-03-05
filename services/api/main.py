@@ -4,9 +4,11 @@ from contextlib import asynccontextmanager
 
 import asyncpg
 import redis.asyncio as aioredis
-from fastapi import FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
 
+from chronosdb.db.base import init_async_engine
+from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.middleware import (
     LoggingMiddleware,
@@ -19,6 +21,7 @@ from services.api.middleware import (
 async def lifespan(app: FastAPI):
     """Application lifespan: setup and teardown."""
     configure_structlog()
+    init_async_engine(settings.database_url)
     yield
     # Teardown handled by dependency cleanup
 
@@ -31,6 +34,9 @@ app = FastAPI(
 
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(RequestIdMiddleware)
+
+# Tenant-scoped v1 API (requires API key)
+v1_router = APIRouter(prefix="/v1/{tenant_id}", tags=["v1"])
 
 
 async def _check_postgres() -> bool:
@@ -78,3 +84,12 @@ async def readyz() -> JSONResponse:
         "redis": "ok" if redis_ok else "unreachable",
     }
     return JSONResponse(content=details, status_code=503)
+
+
+@v1_router.get("/healthz")
+async def v1_healthz(auth: AuthContext = Depends(require_api_key)) -> dict:
+    """Tenant-scoped health check. Requires valid API key."""
+    return {"status": "ok", "tenant_id": auth.tenant_id}
+
+
+app.include_router(v1_router)

@@ -63,7 +63,12 @@ pytest -v
 
 ## API endpoints
 
-| Endpoint   | Description                                      |
-|-----------|--------------------------------------------------|
-| `GET /healthz` | Liveness probe (process running)              |
-| `GET /readyz`  | Readiness probe (Postgres + Redis reachable) |
+| Endpoint   | Auth | Description                                      |
+|-----------|------|--------------------------------------------------|
+| `GET /healthz` | No | Liveness probe (process running)              |
+| `GET /readyz`  | No | Readiness probe (Postgres + Redis reachable) |
+| `GET /v1/{tenant_id}/healthz` | Bearer token | Tenant-scoped health check |
+
+### Authentication
+
+Tenant-scoped endpoints require `Authorization: Bearer <api_key>`. The API key must belong to the tenant in the path.
