@@ -2,6 +2,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import AsyncMock, MagicMock
 
 from services.api.main import app
 

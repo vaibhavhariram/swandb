@@ -68,6 +68,9 @@ pytest -v
 | `GET /healthz` | No | Liveness probe (process running)              |
 | `GET /readyz`  | No | Readiness probe (Postgres + Redis reachable) |
 | `GET /v1/{tenant_id}/healthz` | Bearer token | Tenant-scoped health check |
+| `POST /v1/{tenant_id}/registry/features` | Bearer token | Create feature |
+| `POST /v1/{tenant_id}/registry/features/{name}/versions` | Bearer token | Create feature version |
+| `GET /v1/{tenant_id}/registry/features/{name}` | Bearer token | Get feature with versions |
 
 ### Authentication
 

@@ -116,7 +116,7 @@ class Feature(Base):
 
 
 class FeatureVersion(Base):
-    """Versioned feature schemas."""
+    """Versioned feature schemas with immutable transform_spec."""
 
     __tablename__ = "feature_versions"
 
@@ -132,7 +132,13 @@ class FeatureVersion(Base):
         index=True,
     )
     version: Mapped[int] = mapped_column(nullable=False)
-    schema_: Mapped[dict[str, Any]] = mapped_column("schema", JSONB, nullable=False)
+    schema_: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        "schema", JSONB, nullable=True
+    )  # deprecated, use transform_spec
+    transform_spec: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict
+    )
+    spec_hash: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
