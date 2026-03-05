@@ -39,6 +39,8 @@ def run_materialize_job(
     feature_refs: list[dict[str, Any]],
     base_path: str | Path,
     database_url: str,
+    redis_url: str | None = None,
+    online_ttl_seconds: int = 86400,
 ) -> tuple[int, int]:
     """
     Run materialization: read events, apply transforms, write feature parquet.
@@ -148,6 +150,23 @@ def run_materialize_job(
                         dt,
                         res_table,
                     )
+                    # Write to online store (Redis)
+                    if redis_url:
+                        from chronosdb.online.store import extract_rows_for_redis, write_features_sync
+                        import redis
+                        redis_client = redis.from_url(redis_url)
+                        try:
+                            rows = extract_rows_for_redis(res_table, transform_spec)
+                            write_features_sync(
+                                redis_client,
+                                tid_str,
+                                name,
+                                fv.version,
+                                rows,
+                                ttl_seconds=online_ttl_seconds,
+                            )
+                        finally:
+                            redis_client.close()
 
                 dt += timedelta(days=1)
 

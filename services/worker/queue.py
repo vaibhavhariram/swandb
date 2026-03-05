@@ -40,6 +40,7 @@ def materialize_enqueue(payload: dict[str, Any]) -> None:
 def _worker_loop(
     database_url: str,
     base_path: str,
+    redis_url: str | None = None,
 ) -> None:
     """Process jobs from the queue."""
     engine = create_engine(_to_sync_url(database_url))
@@ -80,6 +81,7 @@ def _worker_loop(
                         feature_refs=feature_refs,
                         base_path=base_path,
                         database_url=database_url,
+                        redis_url=redis_url,
                     )
                     job.status = "succeeded"
                     job.event_count = event_count
@@ -97,14 +99,18 @@ def _worker_loop(
             pass
 
 
-def start_materialize_worker(database_url: str, base_path: str) -> None:
+def start_materialize_worker(
+    database_url: str,
+    base_path: str,
+    redis_url: str | None = None,
+) -> None:
     """Start the background worker thread. Call at app startup."""
     global _worker_thread
     if _worker_thread is not None:
         return
     _worker_thread = threading.Thread(
         target=_worker_loop,
-        args=(database_url, base_path),
+        args=(database_url, base_path, redis_url),
         daemon=True,
     )
     _worker_thread.start()

@@ -109,3 +109,42 @@ class MaterializeResponse(BaseModel):
     """Response after enqueuing materialization job."""
 
     job_id: str
+
+
+# --- Feature serving ---
+
+
+class GetFeaturesRequest(BaseModel):
+    """Request to fetch online features."""
+
+    entity_keys: dict[str, str] = Field(
+        ...,
+        description="Entity identifiers, e.g. {'user_id': 'u1'}",
+    )
+    feature_refs: list[FeatureRef] = Field(
+        ...,
+        min_length=1,
+        description="Features to fetch",
+    )
+    as_of_ts: datetime = Field(
+        ...,
+        description="Point-in-time for feature values",
+    )
+
+
+class FeatureValue(BaseModel):
+    """Single feature value in get response."""
+
+    feature_ref: dict[str, Any]
+    value: Any = None
+    feature_ts: str | None = None
+    status: str = Field(
+        ...,
+        description="ok | current_fallback | not_found | missing_entity | invalid_ref",
+    )
+
+
+class GetFeaturesResponse(BaseModel):
+    """Response from online feature fetch."""
+
+    features: list[FeatureValue]

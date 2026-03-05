@@ -48,6 +48,7 @@ async def post_materialize(
         "feature_refs": feature_refs,
         "base_path": settings.offline_objects_path,
         "database_url": settings.database_url,
+        "redis_url": settings.redis_url,
     })
 
     return MaterializeResponse(job_id=str(job.id))

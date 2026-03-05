@@ -77,6 +77,7 @@ Materialization jobs use an **in-process queue**: no Celery or external job brok
 | `GET /v1/{tenant_id}/registry/features/{name}` | Bearer token | Get feature with versions |
 | `POST /v1/{tenant_id}/ingest/events` | Bearer token | Batch event ingestion |
 | `POST /v1/{tenant_id}/materialize` | Bearer token | Enqueue materialization job |
+| `POST /v1/{tenant_id}/features/get` | Bearer token | Fetch online features |
 
 ### Authentication
 
