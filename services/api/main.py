@@ -1,0 +1,80 @@
+"""FastAPI application for ChronosDB API service."""
+
+from contextlib import asynccontextmanager
+
+import asyncpg
+import redis.asyncio as aioredis
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+
+from services.api.config import settings
+from services.api.middleware import (
+    LoggingMiddleware,
+    RequestIdMiddleware,
+    configure_structlog,
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan: setup and teardown."""
+    configure_structlog()
+    yield
+    # Teardown handled by dependency cleanup
+
+
+app = FastAPI(
+    title="ChronosDB API",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(LoggingMiddleware)
+app.add_middleware(RequestIdMiddleware)
+
+
+async def _check_postgres() -> bool:
+    """Check Postgres connectivity."""
+    try:
+        conn = await asyncpg.connect(settings.database_url)
+        await conn.close()
+        return True
+    except Exception:
+        return False
+
+
+async def _check_redis() -> bool:
+    """Check Redis connectivity."""
+    try:
+        client = aioredis.from_url(settings.redis_url)
+        await client.ping()
+        await client.aclose()
+        return True
+    except Exception:
+        return False
+
+
+@app.get("/healthz")
+async def healthz() -> dict:
+    """Liveness probe: returns 200 if the process is running."""
+    return {"status": "ok"}
+
+
+@app.get("/readyz")
+async def readyz() -> JSONResponse:
+    """Readiness probe: returns 200 if Postgres and Redis are reachable."""
+    postgres_ok = await _check_postgres()
+    redis_ok = await _check_redis()
+
+    if postgres_ok and redis_ok:
+        return JSONResponse(
+            content={"status": "ok", "postgres": "ok", "redis": "ok"},
+            status_code=200,
+        )
+
+    details = {
+        "status": "degraded",
+        "postgres": "ok" if postgres_ok else "unreachable",
+        "redis": "ok" if redis_ok else "unreachable",
+    }
+    return JSONResponse(content=details, status_code=503)
