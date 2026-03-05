@@ -140,33 +140,39 @@ async def test_get_features_fallback_to_current() -> None:
     assert results[0]["status"] == "current_fallback"
 
 
+@pytest.mark.integration
 def test_materialize_writes_redis_keys() -> None:
-    """Materialize job invokes write_features_sync when redis_url provided."""
-    from unittest.mock import patch, MagicMock
+    """Materialize job invokes write_features_sync when redis_url provided. Requires RUN_INTEGRATION=1."""
+    import os
+    if os.environ.get("RUN_INTEGRATION") != "1":
+        pytest.skip("Set RUN_INTEGRATION=1 to run")
+
+    from unittest.mock import patch
     import tempfile
     from pathlib import Path
     from datetime import date
 
-    with patch("services.worker.jobs.materialize.write_features_sync") as mock_write:
+    db_url = os.environ.get(
+        "DATABASE_URL",
+        "postgresql://chronosdb:chronosdb@localhost:5432/chronosdb",
+    )
+    if "postgresql" not in db_url:
+        pytest.skip("Requires Postgres (DATABASE_URL)")
+
+    sync_url = db_url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
+    if sync_url.startswith("postgresql://") and "+" not in sync_url:
+        sync_url = sync_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+    with patch("services.worker.jobs.materialize.online_store.write_features_sync") as mock_write:
         mock_write.return_value = 2
         with tempfile.TemporaryDirectory() as tmp:
             base_path = Path(tmp)
-            # Use Postgres if available; else skip
-            import os
-            db_url = os.environ.get("DATABASE_URL", "postgresql://chronosdb:chronosdb@localhost:5432/chronosdb")
-            if "postgresql" not in db_url:
-                pytest.skip("Materialize Redis test requires Postgres (DATABASE_URL)")
-
             from chronosdb.offline.writer import write_events_parquet
             from chronosdb.offline.layout import events_path
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
             from chronosdb.db.base import Base
             from chronosdb.db.models import Tenant, Source, Feature, FeatureVersion
-
-            sync_url = db_url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
-            if sync_url.startswith("postgresql://") and "+" not in sync_url:
-                sync_url = sync_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
             engine = create_engine(sync_url)
             Base.metadata.create_all(engine)
@@ -217,7 +223,6 @@ def test_materialize_writes_redis_keys() -> None:
             engine.dispose()
 
         mock_write.assert_called()
-        call_kw = mock_write.call_args[1] if mock_write.call_args[1] else {}
         call_args = mock_write.call_args[0]
         assert call_args[1] == "amount"
         assert call_args[2] == 1

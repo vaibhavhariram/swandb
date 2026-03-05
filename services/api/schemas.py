@@ -187,6 +187,10 @@ class ValidateParityRequest(BaseModel):
         min_length=1,
         description="Features to validate",
     )
+    entity_keys: list[str] | None = Field(
+        default=None,
+        description="Entity key names, e.g. ['user_id']. If omitted, derived from registry (first feature's transform_spec.entity_key).",
+    )
     sample_size: int = Field(default=100, ge=1, le=10000)
     threshold: float = Field(default=0.0, ge=0.0, le=1.0, description="Max allowed mismatch_rate")
 

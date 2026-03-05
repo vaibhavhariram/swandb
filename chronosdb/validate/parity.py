@@ -1,5 +1,6 @@
 """Offline/online parity validation."""
 
+import json
 import random
 from datetime import datetime
 from pathlib import Path
@@ -8,7 +9,6 @@ from typing import Any
 import pyarrow.parquet as pq
 import redis.asyncio as aioredis
 
-from chronosdb.offline.layout import features_path
 from chronosdb.online.store import get_features_async
 
 
@@ -69,10 +69,33 @@ def _get_offline_value(
     return best_val
 
 
+def _extract_entity_key_values(
+    tbl: Any,
+    row_idx: int,
+    entity_keys: list[str],
+) -> dict[str, str] | None:
+    """Extract entity_key_values from parquet row. Supports entity_id or entity_keys column."""
+    if "entity_id" in tbl.column_names:
+        eid = tbl.column("entity_id")[row_idx]
+        eid_val = eid.as_py() if hasattr(eid, "as_py") else str(eid)
+        if not eid_val or not entity_keys:
+            return None
+        return {entity_keys[0]: str(eid_val)}
+    if "entity_keys" in tbl.column_names:
+        ek = tbl.column("entity_keys")[row_idx]
+        s = ek.as_py() if hasattr(ek, "as_py") else str(ek)
+        parsed = json.loads(s) if isinstance(s, str) else s
+        if not isinstance(parsed, dict):
+            return None
+        return {k: str(parsed[k]) for k in entity_keys if k in parsed}
+    return None
+
+
 async def run_parity_validation(
     base_path: str | Path,
     tenant_id: str,
     feature_refs: list[dict[str, Any]],
+    entity_keys: list[str],
     redis_url: str,
     sample_size: int = 100,
     threshold: float = 0.0,
@@ -80,12 +103,13 @@ async def run_parity_validation(
     """
     Sample entities and as_of_ts, compare offline vs online.
     Returns dict with mismatch_count, mismatch_rate, status, details.
+    entity_keys: list of key names, e.g. ["user_id"].
     """
     base_path = Path(base_path)
     tid_str = str(tenant_id)
 
-    # Collect (entity_id, as_of_ts) from offline feature parquet
-    entity_ts_pairs = []
+    # Collect (entity_key_values, as_of_ts, ref) from offline feature parquet
+    entity_ts_pairs: list[tuple[dict[str, str], Any, dict]] = []
     for ref in feature_refs:
         name = ref.get("name")
         version = ref.get("version", 1)
@@ -96,16 +120,17 @@ async def run_parity_validation(
             continue
         for p in feat_dir.rglob("*.parquet"):
             tbl = pq.read_table(p)
-            if "entity_id" not in tbl.column_names or tbl.num_rows == 0:
+            if "entity_id" not in tbl.column_names and "entity_keys" not in tbl.column_names:
+                continue
+            if tbl.num_rows == 0:
                 continue
             ts_col = "feature_ts" if "feature_ts" in tbl.column_names else "as_of_event_ts" if "as_of_event_ts" in tbl.column_names else "event_ts"
             for i in range(tbl.num_rows):
-                eid = tbl.column("entity_id")[i]
-                eid_val = eid.as_py() if hasattr(eid, "as_py") else str(eid)
+                ekv = _extract_entity_key_values(tbl, i, entity_keys)
                 ts_val = tbl.column(ts_col)[i]
                 ts_py = ts_val.as_py() if hasattr(ts_val, "as_py") else ts_val
-                if eid_val and ts_py:
-                    entity_ts_pairs.append((str(eid_val), ts_py, ref))
+                if ekv and ts_py:
+                    entity_ts_pairs.append((ekv, ts_py, ref))
 
     if len(entity_ts_pairs) == 0:
         return {
@@ -120,9 +145,13 @@ async def run_parity_validation(
     client = aioredis.from_url(redis_url)
     mismatches = 0
     details_list = []
+    primary_key = entity_keys[0] if entity_keys else "user_id"
 
     try:
-        for entity_id, as_of_ts, ref in sample:
+        for entity_key_values, as_of_ts, ref in sample:
+            entity_id = entity_key_values.get(primary_key)
+            if not entity_id:
+                continue
             offline_val = _get_offline_value(
                 base_path, tid_str,
                 ref["name"], ref.get("version", 1),
@@ -131,16 +160,17 @@ async def run_parity_validation(
             online_results = await get_features_async(
                 client,
                 tid_str,
-                {"user_id": entity_id},
+                entity_key_values,
                 [ref],
                 as_of_ts,
+                entity_key=primary_key,
             )
             online_val = online_results[0]["value"] if online_results else None
 
             if _values_differ(offline_val, online_val):
                 mismatches += 1
                 details_list.append({
-                    "entity_id": entity_id,
+                    "entity_key_values": entity_key_values,
                     "as_of_ts": as_of_ts.isoformat() if hasattr(as_of_ts, "isoformat") else str(as_of_ts),
                     "feature": ref.get("name"),
                     "offline": offline_val,

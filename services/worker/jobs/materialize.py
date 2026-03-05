@@ -21,6 +21,9 @@ from chronosdb.offline.layout import events_path, features_path
 from chronosdb.offline.features import write_feature_parquet
 from chronosdb.transforms.engine import apply_transform
 
+# Import online store as module for stable patch target in tests
+from chronosdb.online import store as online_store
+
 
 def _to_sync_url(url: str) -> str:
     """Convert asyncpg URL to sync psycopg URL."""
@@ -152,12 +155,13 @@ def run_materialize_job(
                     )
                     # Write to online store (Redis)
                     if redis_url:
-                        from chronosdb.online.store import extract_rows_for_redis, write_features_sync
                         import redis
                         redis_client = redis.from_url(redis_url)
                         try:
-                            rows = extract_rows_for_redis(res_table, transform_spec)
-                            write_features_sync(
+                            rows = online_store.extract_rows_for_redis(
+                                res_table, transform_spec
+                            )
+                            online_store.write_features_sync(
                                 redis_client,
                                 tid_str,
                                 name,

@@ -59,3 +59,7 @@ build-backend = "poetry.core.masonry.api"
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
+addopts = ["-m", "not integration"]
+markers = [
+    "integration: marks tests as integration tests (run with RUN_INTEGRATION=1)",
+]

@@ -107,6 +107,9 @@ class Feature(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
+    entity_keys: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=lambda: ["user_id"]
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow

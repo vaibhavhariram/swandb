@@ -1,17 +1,24 @@
 """Integration test: ingest events -> register feature+version -> materialize -> feature parquet exists."""
 
 import os
+
+import pytest
 import tempfile
 import uuid
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pyarrow.parquet as pq
-import pytest
 
 from chronosdb.offline.layout import events_path, features_path
 from chronosdb.offline.writer import write_events_parquet
 from services.worker.jobs.materialize import run_materialize_job
+
+
+@pytest.fixture(autouse=True)
+def _require_integration():
+    if os.environ.get("RUN_INTEGRATION") != "1":
+        pytest.skip("Set RUN_INTEGRATION=1 to run integration tests")
 
 
 def _get_test_db_url() -> str:
@@ -34,6 +41,7 @@ def temp_offline_path():
         yield Path(tmp)
 
 
+@pytest.mark.integration
 def test_materialize_integration(temp_offline_path):
     """
     Full flow: create tenant/source/feature/version, write events parquet,
