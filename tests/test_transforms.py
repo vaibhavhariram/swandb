@@ -123,3 +123,133 @@ def test_passthrough_output_has_spec_hash_and_feature_version() -> None:
         idx_ver = cols.index("feature_version")
         assert row[idx_spec] == expected_hash
         assert row[idx_ver] == 3
+
+
+# --- window_agg ---
+
+
+def test_window_agg_event_exactly_at_label_ts_included() -> None:
+    """Event exactly at label_ts is included in the window."""
+    conn = duckdb.connect(":memory:")
+    conn.execute("""
+        CREATE TABLE events (
+            event_id VARCHAR, event_hash VARCHAR, entity_keys VARCHAR,
+            event_ts TIMESTAMP, event_type VARCHAR, payload VARCHAR, ingest_ts TIMESTAMP
+        )
+    """)
+    # Single event at 10:00:00; label_ts = 10:00:00
+    conn.execute("""
+        INSERT INTO events VALUES
+        ('e1', 'h1', '{"user_id": "u1"}', '2025-03-05 10:00:00', 'x', '{"amount": 100}', '2025-03-05 10:00:01')
+    """)
+    input_rel = conn.table("events")
+
+    spec = {"type": "window_agg", "op": "count", "entity_key": "user_id", "window": "1h"}
+    result = apply_transform(conn, input_rel, spec, as_of="2025-03-05 10:00:00")
+
+    rows = result.fetchall()
+    assert len(rows) == 1
+    assert rows[0][0] == "u1"  # entity_id
+    assert rows[0][1] == 1.0   # count
+
+
+def test_window_agg_event_after_label_ts_excluded() -> None:
+    """Event after label_ts is excluded from the window."""
+    conn = duckdb.connect(":memory:")
+    conn.execute("""
+        CREATE TABLE events (
+            event_id VARCHAR, event_hash VARCHAR, entity_keys VARCHAR,
+            event_ts TIMESTAMP, event_type VARCHAR, payload VARCHAR, ingest_ts TIMESTAMP
+        )
+    """)
+    # Event at 10:05:00; label_ts = 10:00:00, window 1h -> (09:00, 10:00]
+    conn.execute("""
+        INSERT INTO events VALUES
+        ('e1', 'h1', '{"user_id": "u1"}', '2025-03-05 10:05:00', 'x', '{"amount": 100}', '2025-03-05 10:05:01')
+    """)
+    input_rel = conn.table("events")
+
+    spec = {"type": "window_agg", "op": "count", "entity_key": "user_id", "window": "1h"}
+    result = apply_transform(conn, input_rel, spec, as_of="2025-03-05 10:00:00")
+
+    rows = result.fetchall()
+    assert len(rows) == 0
+
+
+def test_window_agg_sum() -> None:
+    """Window agg sum aggregates correctly."""
+    conn = duckdb.connect(":memory:")
+    conn.execute("""
+        CREATE TABLE events (
+            event_id VARCHAR, event_hash VARCHAR, entity_keys VARCHAR,
+            event_ts TIMESTAMP, event_type VARCHAR, payload VARCHAR, ingest_ts TIMESTAMP
+        )
+    """)
+    conn.execute("""
+        INSERT INTO events VALUES
+        ('e1', 'h1', '{"user_id": "u1"}', '2025-03-05 09:30:00', 'x', '{"amount": 10}', '2025-03-05 09:30:01'),
+        ('e2', 'h2', '{"user_id": "u1"}', '2025-03-05 10:00:00', 'x', '{"amount": 20}', '2025-03-05 10:00:01'),
+        ('e3', 'h3', '{"user_id": "u2"}', '2025-03-05 09:45:00', 'x', '{"amount": 5}', '2025-03-05 09:45:01')
+    """)
+    input_rel = conn.table("events")
+
+    spec = {"type": "window_agg", "op": "sum", "field": "amount", "entity_key": "user_id", "window": "1h"}
+    result = apply_transform(conn, input_rel, spec, as_of="2025-03-05 10:00:00")
+
+    rows = result.fetchall()
+    assert len(rows) == 2
+    by_entity = {r[0]: r[1] for r in rows}
+    assert by_entity["u1"] == 30.0  # 10 + 20
+    assert by_entity["u2"] == 5.0
+
+
+def test_window_agg_last() -> None:
+    """Window agg last returns most recent value in window."""
+    conn = duckdb.connect(":memory:")
+    conn.execute("""
+        CREATE TABLE events (
+            event_id VARCHAR, event_hash VARCHAR, entity_keys VARCHAR,
+            event_ts TIMESTAMP, event_type VARCHAR, payload VARCHAR, ingest_ts TIMESTAMP
+        )
+    """)
+    conn.execute("""
+        INSERT INTO events VALUES
+        ('e1', 'h1', '{"user_id": "u1"}', '2025-03-05 09:30:00', 'x', '{"score": 1}', '2025-03-05 09:30:01'),
+        ('e2', 'h2', '{"user_id": "u1"}', '2025-03-05 10:00:00', 'x', '{"score": 2}', '2025-03-05 10:00:01')
+    """)
+    input_rel = conn.table("events")
+
+    spec = {"type": "window_agg", "op": "last", "field": "score", "entity_key": "user_id", "window": "1h"}
+    result = apply_transform(conn, input_rel, spec, as_of="2025-03-05 10:00:00")
+
+    rows = result.fetchall()
+    assert len(rows) == 1
+    assert rows[0][1] == "2"  # last by event_ts
+
+
+def test_window_agg_avg_and_max() -> None:
+    """Window agg avg and max work correctly."""
+    conn = duckdb.connect(":memory:")
+    conn.execute("""
+        CREATE TABLE events (
+            event_id VARCHAR, event_hash VARCHAR, entity_keys VARCHAR,
+            event_ts TIMESTAMP, event_type VARCHAR, payload VARCHAR, ingest_ts TIMESTAMP
+        )
+    """)
+    conn.execute("""
+        INSERT INTO events VALUES
+        ('e1', 'h1', '{"user_id": "u1"}', '2025-03-05 09:30:00', 'x', '{"amount": 10}', '2025-03-05 09:30:01'),
+        ('e2', 'h2', '{"user_id": "u1"}', '2025-03-05 10:00:00', 'x', '{"amount": 20}', '2025-03-05 10:00:01')
+    """)
+    input_rel = conn.table("events")
+
+    spec = {"type": "window_agg", "op": "avg", "field": "amount", "entity_key": "user_id", "window": "1h"}
+    result = apply_transform(conn, input_rel, spec, as_of="2025-03-05 10:00:00")
+    rows = result.fetchall()
+    assert len(rows) == 1
+    assert rows[0][1] == 15.0  # (10+20)/2
+
+    spec_max = {"type": "window_agg", "op": "max", "field": "amount", "entity_key": "user_id", "window": "1h"}
+    result_max = apply_transform(conn, input_rel, spec_max, as_of="2025-03-05 10:00:00")
+    rows_max = result_max.fetchall()
+    assert rows_max[0][1] == 20.0

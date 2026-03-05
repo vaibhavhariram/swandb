@@ -7,10 +7,12 @@ import duckdb
 from chronosdb.transforms.last_value import last_value
 from chronosdb.transforms.passthrough import passthrough
 from chronosdb.transforms.spec import compute_spec_hash
+from chronosdb.transforms.window_agg import window_agg
 
 _TRANSFORMS: dict[str, Any] = {
     "passthrough": passthrough,
     "last_value": last_value,
+    "window_agg": window_agg,
 }
 
 
