@@ -51,3 +51,33 @@ class GetFeatureResponse(BaseModel):
     source_id: str | None
     created_at: datetime
     versions: list[FeatureVersionResponse]
+
+
+# --- Event ingestion ---
+
+
+class IngestEvent(BaseModel):
+    """Single event in a batch."""
+
+    event_id: str | None = Field(None, description="Optional; else event_hash computed")
+    entity_keys: dict[str, Any] | list[Any] = Field(default_factory=dict)
+    event_ts: datetime
+    event_type: str = ""
+    payload: dict[str, Any] | Any = Field(default_factory=dict)
+
+
+class IngestEventsRequest(BaseModel):
+    """Batch event ingestion request."""
+
+    source_id: str = Field(..., description="Source ID")
+    idempotency_key: str = Field(..., min_length=1, description="Idempotency key")
+    events: list[IngestEvent] = Field(..., min_length=1)
+
+
+class IngestEventsResponse(BaseModel):
+    """Response after ingesting events."""
+
+    job_id: str
+    event_count: int
+    max_event_ts: datetime | None = None
+    max_ingest_ts: datetime | None = None

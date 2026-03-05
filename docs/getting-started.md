@@ -20,6 +20,7 @@ poetry run pytest -v
 |----------------|----------------------------------------------|--------------------|
 | `DATABASE_URL` | `postgresql://chronosdb:chronosdb@localhost:5432/chronosdb` | Postgres connection |
 | `REDIS_URL`    | `redis://localhost:6379/0`                   | Redis connection   |
+| `OFFLINE_OBJECTS_PATH` | `offline`                         | Base path for parquet storage |
 
 ## Authentication
 

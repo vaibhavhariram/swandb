@@ -169,9 +169,22 @@ class IngestionJob(Base):
         index=True,
     )
     status: Mapped[str] = mapped_column(Text, nullable=False)
+    idempotency_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True, index=True)
+    event_count: Mapped[Optional[int]] = mapped_column(nullable=True)
+    max_event_ts: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    max_ingest_ts: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_ingestion_jobs_tenant_source_idempotency",
+            "tenant_id",
+            "source_id",
+            "idempotency_key",
+        ),
     )
 
 

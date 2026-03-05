@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://chronosdb:chronosdb@localhost:5432/chronosdb"
     redis_url: str = "redis://localhost:6379/0"
+    offline_objects_path: str = "offline"
 
 
 settings = Settings()

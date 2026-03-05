@@ -71,6 +71,7 @@ pytest -v
 | `POST /v1/{tenant_id}/registry/features` | Bearer token | Create feature |
 | `POST /v1/{tenant_id}/registry/features/{name}/versions` | Bearer token | Create feature version |
 | `GET /v1/{tenant_id}/registry/features/{name}` | Bearer token | Get feature with versions |
+| `POST /v1/{tenant_id}/ingest/events` | Bearer token | Batch event ingestion |
 
 ### Authentication
 

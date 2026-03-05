@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from chronosdb.db.base import init_async_engine
-from services.api import registry
+from services.api import ingest, registry
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.middleware import (
@@ -94,4 +94,5 @@ async def v1_healthz(auth: AuthContext = Depends(require_api_key)) -> dict:
 
 
 v1_router.include_router(registry.router)
+v1_router.include_router(ingest.router)
 app.include_router(v1_router)
