@@ -18,3 +18,20 @@ def events_path(
     base = Path(base_dir)
     dt_str = dt.strftime("%Y-%m-%d")
     return base / "events" / f"tenant={tenant_id}" / f"source={source_id}" / f"dt={dt_str}" / f"{part}.parquet"
+
+
+def features_path(
+    base_dir: str | Path,
+    tenant_id: str,
+    feature_name: str,
+    version: int,
+    dt: date,
+    part: str = "part-0000",
+) -> Path:
+    """
+    Return path for feature parquet file.
+    Layout: offline/features/tenant={tenant}/feature={name}/version={v}/dt=YYYY-MM-DD/part-0000.parquet
+    """
+    base = Path(base_dir)
+    dt_str = dt.strftime("%Y-%m-%d")
+    return base / "features" / f"tenant={tenant_id}" / f"feature={feature_name}" / f"version={version}" / f"dt={dt_str}" / f"{part}.parquet"

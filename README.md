@@ -61,6 +61,10 @@ uvicorn services.api.main:app --reload --host 0.0.0.0 --port 8000
 pytest -v
 ```
 
+### Materialization (MVP)
+
+Materialization jobs use an **in-process queue**: no Celery or external job broker. Jobs are enqueued via `POST /v1/{tenant_id}/materialize` and processed by a background thread in the same process. For production, replace with Celery or similar.
+
 ## API endpoints
 
 | Endpoint   | Auth | Description                                      |
@@ -72,6 +76,7 @@ pytest -v
 | `POST /v1/{tenant_id}/registry/features/{name}/versions` | Bearer token | Create feature version |
 | `GET /v1/{tenant_id}/registry/features/{name}` | Bearer token | Get feature with versions |
 | `POST /v1/{tenant_id}/ingest/events` | Bearer token | Batch event ingestion |
+| `POST /v1/{tenant_id}/materialize` | Bearer token | Enqueue materialization job |
 
 ### Authentication
 

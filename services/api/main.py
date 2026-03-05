@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from chronosdb.db.base import init_async_engine
-from services.api import ingest, registry
+from services.api import ingest, materialize, registry
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.middleware import (
@@ -23,6 +23,9 @@ async def lifespan(app: FastAPI):
     """Application lifespan: setup and teardown."""
     configure_structlog()
     init_async_engine(settings.database_url)
+    from services.worker.queue import start_materialize_worker
+
+    start_materialize_worker(settings.database_url, settings.offline_objects_path)
     yield
     # Teardown handled by dependency cleanup
 
@@ -95,4 +98,5 @@ async def v1_healthz(auth: AuthContext = Depends(require_api_key)) -> dict:
 
 v1_router.include_router(registry.router)
 v1_router.include_router(ingest.router)
+v1_router.include_router(materialize.router)
 app.include_router(v1_router)

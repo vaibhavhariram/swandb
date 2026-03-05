@@ -144,3 +144,19 @@ async def get_feature_versions(
         .order_by(FeatureVersion.version)
     )
     return list(result.scalars().all())
+
+
+async def get_feature_version(
+    session: AsyncSession,
+    feature_id: str | uuid.UUID,
+    version: int,
+) -> FeatureVersion | None:
+    """Get a specific feature version by feature_id and version number."""
+    fid = uuid.UUID(str(feature_id)) if isinstance(feature_id, str) else feature_id
+    result = await session.execute(
+        select(FeatureVersion).where(
+            FeatureVersion.feature_id == fid,
+            FeatureVersion.version == version,
+        )
+    )
+    return result.scalar_one_or_none()

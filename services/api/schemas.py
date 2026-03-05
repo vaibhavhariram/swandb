@@ -1,6 +1,6 @@
 """Pydantic schemas for API request/response."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -81,3 +81,31 @@ class IngestEventsResponse(BaseModel):
     event_count: int
     max_event_ts: datetime | None = None
     max_ingest_ts: datetime | None = None
+
+
+# --- Materialization ---
+
+
+class FeatureRef(BaseModel):
+    """Reference to a feature and version."""
+
+    name: str = Field(..., min_length=1, description="Feature name")
+    version: int = Field(..., ge=1, description="Feature version")
+
+
+class MaterializeRequest(BaseModel):
+    """Request to materialize offline features."""
+
+    range_start: date = Field(..., description="Start date (inclusive)")
+    range_end: date = Field(..., description="End date (inclusive)")
+    feature_refs: list[FeatureRef] = Field(
+        ...,
+        min_length=1,
+        description="Features to materialize",
+    )
+
+
+class MaterializeResponse(BaseModel):
+    """Response after enqueuing materialization job."""
+
+    job_id: str

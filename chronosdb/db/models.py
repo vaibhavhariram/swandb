@@ -1,10 +1,10 @@
 """SQLAlchemy models for ChronosDB schema."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Optional
 
-from sqlalchemy import DateTime, ForeignKey, Index, Text, UniqueConstraint
+from sqlalchemy import Date, DateTime, ForeignKey, Index, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -205,6 +205,13 @@ class MaterializationJob(Base):
         index=True,
     )
     status: Mapped[str] = mapped_column(Text, nullable=False)
+    range_start: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    range_end: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    feature_refs: Mapped[Optional[list[dict[str, Any]]]] = mapped_column(
+        JSONB, nullable=True
+    )
+    event_count: Mapped[Optional[int]] = mapped_column(nullable=True)
+    feature_row_count: Mapped[Optional[int]] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow
