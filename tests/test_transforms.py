@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 import duckdb
 import pytest
 
-from chronosdb.transforms.engine import apply_transform
-from chronosdb.transforms.spec import compute_spec_hash
+from swandb.transforms.engine import apply_transform
+from swandb.transforms.spec import compute_spec_hash
 
 
 def _events_table(conn: duckdb.DuckDBPyConnection) -> duckdb.DuckDBPyRelation:

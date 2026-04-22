@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from chronosdb.db.models import MaterializationJob
+from swandb.db.models import MaterializationJob
 
 from services.worker.jobs.materialize import run_materialize_job
 

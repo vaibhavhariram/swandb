@@ -6,9 +6,9 @@ from typing import Any, Optional
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chronosdb.auth import hash_key
-from chronosdb.db.models import ApiKey, Feature, FeatureVersion, Source, Tenant
-from chronosdb.transforms.spec import compute_spec_hash
+from swandb.auth import hash_key
+from swandb.db.models import ApiKey, Feature, FeatureVersion, Source, Tenant
+from swandb.transforms.spec import compute_spec_hash
 
 
 async def create_tenant(session: AsyncSession, name: str) -> Tenant:

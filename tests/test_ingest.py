@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pyarrow.parquet as pq
 import pytest
 
-from chronosdb.offline.events import dedupe_events
-from chronosdb.offline.layout import events_path
-from chronosdb.offline.writer import EVENTS_SCHEMA, write_events_parquet
+from swandb.offline.events import dedupe_events
+from swandb.offline.layout import events_path
+from swandb.offline.writer import EVENTS_SCHEMA, write_events_parquet
 
 
 def test_write_events_parquet_schema() -> None:
@@ -38,7 +38,7 @@ def test_write_events_parquet_schema() -> None:
 
 def test_ingest_writes_parquet_via_service() -> None:
     """Ingest service writes parquet when no existing idempotent job."""
-    from chronosdb.ingest.service import ingest_events
+    from swandb.ingest.service import ingest_events
 
     async def _run():
         result = MagicMock()
@@ -78,7 +78,7 @@ def test_ingest_writes_parquet_via_service() -> None:
 
 def test_ingest_idempotency_returns_prior_job() -> None:
     """When get_existing_idempotent_job returns a job, ingest_events returns it without writing."""
-    from chronosdb.ingest.service import ingest_events
+    from swandb.ingest.service import ingest_events
 
     async def _run():
         mock_session = MagicMock()

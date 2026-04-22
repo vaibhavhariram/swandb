@@ -6,7 +6,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chronosdb.db.models import ApiKey
+from swandb.db.models import ApiKey
 
 # Prefix for stored hashes (allows future algorithm rotation)
 HASH_PREFIX = "sha256:"

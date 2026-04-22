@@ -6,7 +6,7 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from chronosdb.offline.layout import features_path
+from swandb.offline.layout import features_path
 
 
 def write_feature_parquet(

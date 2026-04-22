@@ -48,7 +48,7 @@ def test_create_feature(
     mock_feature.created_at = "2025-03-04T12:00:00Z"
     mock_create.return_value = mock_feature
 
-    from chronosdb.db.base import get_session
+    from swandb.db.base import get_session
     from services.api.main import app
 
     async def _mock_session():
@@ -95,7 +95,7 @@ def test_create_version(
     mock_fv.created_at = "2025-03-04T12:00:00Z"
     mock_create_version.return_value = mock_fv
 
-    from chronosdb.db.base import get_session
+    from swandb.db.base import get_session
     from services.api.main import app
 
     async def _mock_session():
@@ -121,7 +121,7 @@ def test_create_version(
 
 def test_spec_hash_stable_for_equivalent_json() -> None:
     """spec_hash is stable for equivalent JSON (key order doesn't matter)."""
-    from chronosdb.transforms.spec import compute_spec_hash
+    from swandb.transforms.spec import compute_spec_hash
 
     spec1 = {"a": 1, "b": 2}
     spec2 = {"b": 2, "a": 1}
@@ -130,7 +130,7 @@ def test_spec_hash_stable_for_equivalent_json() -> None:
 
 def test_spec_hash_different_for_different_json() -> None:
     """spec_hash differs for different JSON."""
-    from chronosdb.transforms.spec import compute_spec_hash
+    from swandb.transforms.spec import compute_spec_hash
 
     spec1 = {"a": 1}
     spec2 = {"a": 2}

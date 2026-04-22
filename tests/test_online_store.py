@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from chronosdb.online.key_format import (
+from swandb.online.key_format import (
     bucket_key,
     bucket_ts_from_as_of,
     current_key,
 )
-from chronosdb.online.store import (
+from swandb.online.store import (
     extract_rows_for_redis,
     get_features_async,
     write_features_sync,
@@ -21,13 +21,13 @@ from chronosdb.online.store import (
 def test_current_key_format() -> None:
     """Current key has expected format."""
     k = current_key("t1", "amount", 1, "u1")
-    assert k == "chronosdb:t1:amount:v1:current:u1"
+    assert k == "swandb:t1:amount:v1:current:u1"
 
 
 def test_bucket_key_format() -> None:
     """Bucket key has expected format."""
     k = bucket_key("t1", "amount", 1, "2025-03-05T10:37:00", "u1")
-    assert k == "chronosdb:t1:amount:v1:b:2025-03-05T10:37:00:u1"
+    assert k == "swandb:t1:amount:v1:b:2025-03-05T10:37:00:u1"
 
 
 def test_bucket_ts_from_as_of() -> None:
@@ -167,12 +167,12 @@ def test_materialize_writes_redis_keys() -> None:
         mock_write.return_value = 2
         with tempfile.TemporaryDirectory() as tmp:
             base_path = Path(tmp)
-            from chronosdb.offline.writer import write_events_parquet
-            from chronosdb.offline.layout import events_path
+            from swandb.offline.writer import write_events_parquet
+            from swandb.offline.layout import events_path
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
-            from chronosdb.db.base import Base
-            from chronosdb.db.models import Tenant, Source, Feature, FeatureVersion
+            from swandb.db.base import Base
+            from swandb.db.models import Tenant, Source, Feature, FeatureVersion
 
             engine = create_engine(sync_url)
             Base.metadata.create_all(engine)

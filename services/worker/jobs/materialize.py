@@ -16,13 +16,13 @@ import pyarrow.parquet as pq
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from chronosdb.db.models import Feature, FeatureVersion
-from chronosdb.offline.layout import events_path, features_path
-from chronosdb.offline.features import write_feature_parquet
-from chronosdb.transforms.engine import apply_transform
+from swandb.db.models import Feature, FeatureVersion
+from swandb.offline.layout import events_path, features_path
+from swandb.offline.features import write_feature_parquet
+from swandb.transforms.engine import apply_transform
 
 # Import online store as module for stable patch target in tests
-from chronosdb.online import store as online_store
+from swandb.online import store as online_store
 
 
 def _to_sync_url(url: str) -> str:

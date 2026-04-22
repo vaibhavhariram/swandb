@@ -1,6 +1,6 @@
 """ChronosDB registry store."""
 
-from chronosdb.registry.store import (
+from swandb.registry.store import (
     create_api_key,
     create_feature,
     create_feature_version,

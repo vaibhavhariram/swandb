@@ -2,15 +2,15 @@
 
 from pathlib import Path
 
-from chronosdb.registry.store import get_feature, get_feature_version
-from chronosdb.training.build import build_training_dataset
+from swandb.registry.store import get_feature, get_feature_version
+from swandb.training.build import build_training_dataset
 from fastapi import APIRouter, Depends, HTTPException
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.schemas import TrainingBuildRequest, TrainingBuildResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chronosdb.db.base import get_session
+from swandb.db.base import get_session
 
 router = APIRouter(prefix="/training", tags=["training"])
 

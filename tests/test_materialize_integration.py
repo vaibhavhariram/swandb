@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pyarrow.parquet as pq
 
-from chronosdb.offline.layout import events_path, features_path
-from chronosdb.offline.writer import write_events_parquet
+from swandb.offline.layout import events_path, features_path
+from swandb.offline.writer import write_events_parquet
 from services.worker.jobs.materialize import run_materialize_job
 
 
@@ -53,8 +53,8 @@ def test_materialize_integration(temp_offline_path):
 
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
-    from chronosdb.db.base import Base
-    from chronosdb.db.models import Tenant, Source, Feature, FeatureVersion
+    from swandb.db.base import Base
+    from swandb.db.models import Tenant, Source, Feature, FeatureVersion
 
     # Sync URL for worker (psycopg)
     sync_url = db_url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)

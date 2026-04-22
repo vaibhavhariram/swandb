@@ -44,7 +44,7 @@ def test_post_materialize_enqueues_job(
     """POST /materialize enqueues job and returns job_id."""
     mock_verify.return_value = (tenant_id, ["read"])
 
-    from chronosdb.db.base import get_session
+    from swandb.db.base import get_session
     from services.api.main import app
 
     async def _mock_session():
@@ -94,7 +94,7 @@ def test_post_materialize_rejects_invalid_range(
     """POST /materialize rejects range_end < range_start."""
     mock_verify.return_value = (tenant_id, ["read"])
 
-    from chronosdb.db.base import get_session
+    from swandb.db.base import get_session
     from services.api.main import app
 
     async def _mock_session():

@@ -6,9 +6,9 @@ from datetime import datetime
 def current_key(tenant_id: str, feature_name: str, version: int, entity_id: str) -> str:
     """
     Redis key for current (latest) feature value.
-    Format: chronosdb:{tenant}:{feature}:v{version}:current:{entity_id}
+    Format: swandb:{tenant}:{feature}:v{version}:current:{entity_id}
     """
-    return f"chronosdb:{tenant_id}:{feature_name}:v{version}:current:{entity_id}"
+    return f"swandb:{tenant_id}:{feature_name}:v{version}:current:{entity_id}"
 
 
 def bucket_key(
@@ -20,10 +20,10 @@ def bucket_key(
 ) -> str:
     """
     Redis key for bucketed as-of feature value (1-minute buckets).
-    Format: chronosdb:{tenant}:{feature}:v{version}:b:{bucket_ts}:{entity_id}
+    Format: swandb:{tenant}:{feature}:v{version}:b:{bucket_ts}:{entity_id}
     bucket_ts: ISO format truncated to minute, e.g. 2025-03-05T10:37:00
     """
-    return f"chronosdb:{tenant_id}:{feature_name}:v{version}:b:{bucket_ts}:{entity_id}"
+    return f"swandb:{tenant_id}:{feature_name}:v{version}:b:{bucket_ts}:{entity_id}"
 
 
 def bucket_ts_from_as_of(as_of_ts: datetime | str) -> str:

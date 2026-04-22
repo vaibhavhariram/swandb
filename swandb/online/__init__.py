@@ -1,6 +1,6 @@
 """Online feature store (Redis)."""
 
-from chronosdb.online.key_format import (
+from swandb.online.key_format import (
     bucket_key,
     bucket_ts_from_as_of,
     current_key,

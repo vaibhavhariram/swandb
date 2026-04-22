@@ -1,7 +1,7 @@
 """Database models and session."""
 
-from chronosdb.db.base import Base, get_async_session, init_async_engine
-from chronosdb.db.models import (
+from swandb.db.base import Base, get_async_session, init_async_engine
+from swandb.db.models import (
     ApiKey,
     Checkpoint,
     Feature,

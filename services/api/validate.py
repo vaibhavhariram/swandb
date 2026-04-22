@@ -1,15 +1,15 @@
 """Parity validation API."""
 
-from chronosdb.db.models import QualityResult
-from chronosdb.registry.store import get_feature, get_feature_version
-from chronosdb.validate.parity import run_parity_validation
+from swandb.db.models import QualityResult
+from swandb.registry.store import get_feature, get_feature_version
+from swandb.validate.parity import run_parity_validation
 from fastapi import APIRouter, Depends, HTTPException
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.schemas import ValidateParityRequest, ValidateParityResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chronosdb.db.base import get_session
+from swandb.db.base import get_session
 
 router = APIRouter(prefix="/validate", tags=["validate"])
 

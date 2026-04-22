@@ -8,8 +8,8 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import Connection
 
 # Import models so Alembic can see them for autogenerate
-from chronosdb.db.base import Base
-from chronosdb.db.models import (  # noqa: F401
+from swandb.db.base import Base
+from swandb.db.models import (  # noqa: F401
     ApiKey,
     Checkpoint,
     Feature,

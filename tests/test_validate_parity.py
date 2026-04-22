@@ -9,7 +9,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from chronosdb.validate.parity import run_parity_validation
+from swandb.validate.parity import run_parity_validation
 
 
 @pytest.mark.asyncio
@@ -56,7 +56,7 @@ async def test_parity_mismatch_rate_zero() -> None:
 
         mock_redis.mget = amock_mget
 
-        with patch("chronosdb.validate.parity.aioredis") as mock_aioredis:
+        with patch("swandb.validate.parity.aioredis") as mock_aioredis:
             mock_aioredis.from_url.return_value = mock_redis
 
             result = await run_parity_validation(
@@ -113,7 +113,7 @@ async def test_parity_arbitrary_entity_keys() -> None:
 
         mock_redis.mget = AsyncMock(side_effect=mock_mget)
 
-        with patch("chronosdb.validate.parity.aioredis") as mock_aioredis:
+        with patch("swandb.validate.parity.aioredis") as mock_aioredis:
             mock_aioredis.from_url.return_value = mock_redis
 
             result = await run_parity_validation(

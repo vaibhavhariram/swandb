@@ -7,7 +7,7 @@ import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
 
-from chronosdb.db.base import init_async_engine
+from swandb.db.base import init_async_engine
 from services.api import features, ingest, materialize, registry, training, validate
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings

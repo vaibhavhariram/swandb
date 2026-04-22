@@ -1,7 +1,7 @@
 """Materialization API: enqueue offline feature materialization jobs."""
 
-from chronosdb.db.base import get_session
-from chronosdb.db.models import MaterializationJob
+from swandb.db.base import get_session
+from swandb.db.models import MaterializationJob
 from fastapi import APIRouter, Depends, HTTPException
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings

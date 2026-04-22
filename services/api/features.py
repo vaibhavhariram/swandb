@@ -3,7 +3,7 @@
 import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends
 
-from chronosdb.online.store import get_features_async
+from swandb.online.store import get_features_async
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
 from services.api.schemas import (

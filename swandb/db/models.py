@@ -8,7 +8,7 @@ from sqlalchemy import Date, DateTime, ForeignKey, Index, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chronosdb.db.base import Base
+from swandb.db.base import Base
 
 
 def _uuid4() -> uuid.UUID:

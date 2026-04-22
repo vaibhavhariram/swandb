@@ -2,8 +2,8 @@
 
 from sqlalchemy.exc import IntegrityError
 
-from chronosdb.db.base import get_session
-from chronosdb.registry.store import (
+from swandb.db.base import get_session
+from swandb.registry.store import (
     create_feature,
     create_feature_version,
     get_feature,

@@ -9,7 +9,7 @@ import duckdb
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from chronosdb.offline.layout import features_path, training_manifest_path, training_path
+from swandb.offline.layout import features_path, training_manifest_path, training_path
 
 
 def _feature_ts_column(cols: list[str]) -> str:

@@ -8,7 +8,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from chronosdb.training.build import build_training_dataset
+from swandb.training.build import build_training_dataset
 
 
 def test_pit_join_golden() -> None:

@@ -9,10 +9,10 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chronosdb.db.models import IngestionJob
-from chronosdb.offline.events import compute_event_hash, dedupe_events
-from chronosdb.offline.layout import events_path
-from chronosdb.offline.writer import write_events_parquet
+from swandb.db.models import IngestionJob
+from swandb.offline.events import compute_event_hash, dedupe_events
+from swandb.offline.layout import events_path
+from swandb.offline.writer import write_events_parquet
 
 
 def _to_datetime(ts: datetime | str) -> datetime:

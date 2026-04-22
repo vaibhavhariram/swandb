@@ -4,8 +4,8 @@ from typing import Annotated
 
 from fastapi import Header, HTTPException, Path
 
-from chronosdb.auth import verify_api_key
-from chronosdb.db.base import get_async_session
+from swandb.auth import verify_api_key
+from swandb.db.base import get_async_session
 
 
 class AuthContext:

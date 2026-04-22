@@ -1,5 +1,5 @@
 [project]
-name = "chronosdb"
+name = "swandb"
 version = "0.1.0"
 description = "PIT-correct time-series feature store with offline/online parity"
 readme = "README.md"
@@ -20,13 +20,13 @@ dependencies = [
 ]
 
 [tool.poetry]
-name = "chronosdb"
+name = "swandb"
 version = "0.1.0"
 description = "PIT-correct time-series feature store with offline/online parity"
 authors = []
 readme = "README.md"
 packages = [
-    { include = "chronosdb" },
+    { include = "swandb" },
     { include = "services" },
 ]
 

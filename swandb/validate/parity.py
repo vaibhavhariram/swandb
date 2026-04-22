@@ -9,7 +9,7 @@ from typing import Any
 import pyarrow.parquet as pq
 import redis.asyncio as aioredis
 
-from chronosdb.online.store import get_features_async
+from swandb.online.store import get_features_async
 
 
 def _get_offline_value(

@@ -1,7 +1,7 @@
 """Event ingestion API routes."""
 
-from chronosdb.db.base import get_session
-from chronosdb.ingest.service import ingest_events
+from swandb.db.base import get_session
+from swandb.ingest.service import ingest_events
 from fastapi import APIRouter, Depends, HTTPException
 from services.api.auth import AuthContext, require_api_key
 from services.api.config import settings
